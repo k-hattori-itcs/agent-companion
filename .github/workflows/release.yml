@@ -25,9 +25,8 @@ jobs:
         shell: pwsh
         run: |
           git fetch --no-tags origin main
-          $tagRefs = @(git ls-remote --tags origin "refs/tags/$env:GITHUB_REF_NAME*")
-          $peeledTagRef = $tagRefs | Where-Object { $_.Trim().EndsWith("^{}") } | Select-Object -First 1
-          if (-not $peeledTagRef) {
+          $peeledTagRef = git ls-remote --tags origin "refs/tags/$env:GITHUB_REF_NAME^{}"
+          if ([string]::IsNullOrWhiteSpace($peeledTagRef)) {
             throw "Release tag $env:GITHUB_REF_NAME must be an annotated tag."
           }
           $tagCommit = ($peeledTagRef -split '\s+')[0]
