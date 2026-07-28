@@ -1,0 +1,22 @@
+{
+  "id": "natsuki",
+  "displayName": "Natsuki",
+  "description": "\u65e5\u713c\u3051\u3057\u305f\u91d1\u9aea\u306e\u30a2\u30af\u30c6\u30a3\u30d6\u306a\u958b\u767a\u30b3\u30f3\u30d1\u30cb\u30aa\u30f3\u3002",
+  "spriteVersionNumber": 2,
+  "spritesheetPath": "spritesheet.png",
+  "spritesheetLayout": {
+    "columns": 8,
+    "rows": 11,
+    "cellWidth": 192,
+    "cellHeight": 208,
+    "lookDirectionCount": 16,
+    "neutralLookFrame": {
+      "rowIndex": 0,
+      "columnIndex": 0
+    }
+  },
+  "animationScales": {
+    "jump": 0.9,
+    "sit": 0.84
+  }
+}
