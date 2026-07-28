@@ -25,11 +25,12 @@ jobs:
         shell: pwsh
         run: |
           git fetch --no-tags origin main
-          $tagType = git cat-file -t "refs/tags/$env:GITHUB_REF_NAME"
-          if ($tagType -ne "tag") {
+          $tagRefs = @(git ls-remote --tags origin "refs/tags/$env:GITHUB_REF_NAME*")
+          $peeledTagRef = $tagRefs | Where-Object { $_.Trim().EndsWith("^{}") } | Select-Object -First 1
+          if (-not $peeledTagRef) {
             throw "Release tag $env:GITHUB_REF_NAME must be an annotated tag."
           }
-          $tagCommit = git rev-list -n 1 $env:GITHUB_REF_NAME
+          $tagCommit = ($peeledTagRef -split '\s+')[0]
           git merge-base --is-ancestor $tagCommit origin/main
           if ($LASTEXITCODE -ne 0) {
             throw "Release tag $env:GITHUB_REF_NAME must point to a commit reachable from main."
