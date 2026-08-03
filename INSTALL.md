@@ -29,7 +29,7 @@
 6. 初回起動後、タスクトレイの AgentCompanion アイコンを右クリックして `設定` を開き、監視対象を設定します。
 7. 自動起動が必要な場合は、設定画面の `接続` タブで `Windows起動時にこの AgentCompanion を起動する` を有効にします。
 
-アプリ本体は終了しても設定、ログ、キャラクターデータを `%LOCALAPPDATA%\AgentCompanion\instances\<instance-id>` に保持します。
+アプリ本体は終了しても設定、ログ、キャラクターデータを `%LOCALAPPDATA%\AgentCompanion\instances\<instance-id>` に保持します。設定画面からインポートした追加キャラクターもこのフォルダに保存されます。
 
 ## 更新
 
@@ -49,7 +49,7 @@
      -Restart
    ```
 
-更新スクリプトはハッシュとZIP内容を確認してから差し替えます。旧EXEは `AgentCompanion.exe.previous` として1世代保持します。アプリフォルダのパスで設定プロファイルを分けるため、更新時は同じフォルダを使ってください。
+更新スクリプトはハッシュとZIP内容を確認してから差し替えます。旧EXEは `AgentCompanion.exe.previous` として1世代保持します。アプリフォルダのパスで設定プロファイルを分けるため、更新時は同じフォルダを使ってください。**同じフォルダで更新する限り、設定画面から追加したキャラクターは保持されます。** 別のフォルダへ展開し直すと別のプロファイルになるため、追加キャラクターは自動移行されません。
 
 ## Claude 利用量API
 
@@ -67,7 +67,7 @@ Claude Code の利用量を正確に表示するための API は、初期状態
    .\Uninstall-AgentCompanion.ps1
    ```
 
-3. 設定、ログ、インポート済みキャラクターも削除する場合は、`-RemoveData` を指定します。
+3. 設定、ログ、インポート済みキャラクターも削除する場合だけ、`-RemoveData` を指定します。通常のアンインストールではこれらのデータは保持されます。
 
    ```powershell
    .\Uninstall-AgentCompanion.ps1 -RemoveData
