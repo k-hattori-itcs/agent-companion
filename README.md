@@ -197,7 +197,7 @@ AgentCompanion は独自テレメトリを送信せず、状況要約のため�
 
 - Codex監視では `%USERPROFILE%/.codex/sessions/**/rollout-*.jsonl` を読みます。
 - Claude監視では、設定したClaudeホーム内の `projects/**/*.jsonl`、`.credentials.json` 内のClaude Code OAuthアクセストークン・更新トークン・有効期限、存在する場合は `agentcompanion-rate-limits.json` を読みます。アクセストークンはAnthropicの利用状況APIへの認証だけに使い、AgentCompanionの設定・表示・ログには保存しません。更新成功時だけ、Claude Codeと共有する `.credentials.json` の値を原子的に更新します。
-- 設定、トークン履歴、proxy転送先、キャラクターデータは `%LOCALAPPDATA%\AgentCompanion\instances\<instance-id>` に保存します。
+- 設定、トークン履歴、proxy転送先、キャラクターデータは `%LOCALAPPDATA%\AgentCompanion\instances\<instance-id>` に保存します。設定画面で追加したキャラクターは、同じインストールフォルダで更新する限り保持されます。別フォルダへ再導入した場合は別プロファイルになるため自動移行されません。
 - 障害ログは同じユーザーデータフォルダ内の `agentcompanion.log` に保存し、1MBでローテーションします。proxyデバッグログは設定で明示的に有効にした場合だけ `debug.log` に保存し、2MBでローテーションします。
 - API proxyは明示的に有効にした場合だけ `127.0.0.1` で待ち受けます。Authorizationヘッダを上流APIへ転送しますが、キーや本文を履歴・ログへ保存しません。上流TLS証明書を標準検証し、未知のprefixは別の転送先へフォールバックせず拒否します。proxyはContent-Length形式のOpenAI互換JSON API専用で、Transfer-EncodingとHTTP pipeliningは拒否します。
 
