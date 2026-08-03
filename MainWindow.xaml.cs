@@ -29,6 +29,7 @@ public partial class MainWindow : Window
     private readonly ClaudeStatusService _claudeStatus = new();
     private readonly CodexLauncherService _codexLauncher = new();
     private readonly VSCodeLauncherService _vsCodeLauncher = new();
+    private readonly ClaudeDesktopLauncherService _claudeDesktopLauncher = new();
     private PetState _state = PetState.Idle;
     private double _sleepTimer;
     private double _sitTimer;
@@ -818,7 +819,9 @@ public partial class MainWindow : Window
 
     private void OpenOrFocusAgent()
     {
-        if (IsVSCodeLauncher())
+        if (IsClaudeDesktopLauncher())
+            _claudeDesktopLauncher.OpenOrFocus();
+        else if (IsVSCodeLauncher())
             _vsCodeLauncher.OpenOrFocus(_app.Config.VSCodeWorkspacePath);
         else
             _codexLauncher.OpenOrFocus();
@@ -831,8 +834,12 @@ public partial class MainWindow : Window
 
     private bool IsVSCodeLauncher()
     {
-        return _app.Config.LauncherTarget.Equals("VSCode", StringComparison.OrdinalIgnoreCase)
-            || IsClaudeProvider();
+        return _app.Config.LauncherTarget.Equals("VSCode", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool IsClaudeDesktopLauncher()
+    {
+        return _app.Config.LauncherTarget.Equals("ClaudeDesktop", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool LooksLikeWaiting(string text)

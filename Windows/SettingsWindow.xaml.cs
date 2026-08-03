@@ -524,10 +524,10 @@ public partial class SettingsWindow : Window
         stack.Children.Add(startupRow);
         stack.Children.Add(Paragraph($"起動先: {_startupService.ExecutablePath}"));
         stack.Children.Add(Label("ダブルクリックで開くアプリ"));
-        stack.Children.Add(MakeChoiceRow(new[] { "Codex", "VSCode" }, _app?.Config.LauncherTarget ?? "Codex", value =>
+        stack.Children.Add(MakeChoiceRow(new[] { "Codex", "VSCode", "Claude Desk" }, _app?.Config.LauncherTarget == "ClaudeDesktop" ? "Claude Desk" : _app?.Config.LauncherTarget ?? "Codex", value =>
         {
             if (_app?.Config == null) return;
-            _app.Config.LauncherTarget = value;
+            _app.Config.LauncherTarget = value == "Claude Desk" ? "ClaudeDesktop" : value;
             _app.Config.Save();
         }));
 
@@ -727,7 +727,7 @@ public partial class SettingsWindow : Window
         stack.Children.Add(SectionHeader("AgentCompanion について"));
         stack.Children.Add(new TextBlock
         {
-            Text = "AgentCompanion v1.0.0",
+            Text = "AgentCompanion v1.1.0",
             Foreground = Brushes.White,
             FontSize = 18,
             FontWeight = FontWeights.Bold,
@@ -737,10 +737,10 @@ public partial class SettingsWindow : Window
         stack.Children.Add(Paragraph("元プロジェクト TokenPet をベースに、Codex/Claude のローカル履歴監視、常時リング表示、アプリ起動/前面表示、複数キャラクター切替を追加しています。"));
 
         stack.Children.Add(SectionHeader("基本操作"));
-        stack.Children.Add(CodeBlock("左ドラッグ: キャラクターを移動\nダブルクリック: Codex / VSCode を開く、または前面に表示\nタスクトレイ右クリック: 表示/非表示、設定、終了"));
+        stack.Children.Add(CodeBlock("左ドラッグ: キャラクターを移動\nダブルクリック: Codex / VSCode / Claude Desk を開く、または前面に表示\nタスクトレイ右クリック: 表示/非表示、設定、終了"));
 
         stack.Children.Add(SectionHeader("設定の要点"));
-        stack.Children.Add(CodeBlock("キャラクター: Koharu / Luna などの見た目を選択、表示サイズ、トークンリング表示\n接続: 監視対象プロファイル、スタートアップ登録、ダブルクリック対象、Claude/VSCode パス、利用量上限\nAPI プロキシ: OpenAI 互換 API を proxy 経由で使う場合のみ設定"));
+        stack.Children.Add(CodeBlock("キャラクター: Koharu / Luna などの見た目を選択、表示サイズ、トークンリング表示\n接続: 監視対象プロファイル、スタートアップ登録、Codex/VSCode/Claude Desk のダブルクリック起動先、Claude/VSCode パス、利用量上限\nAPI プロキシ: OpenAI 互換 API を proxy 経由で使う場合のみ設定"));
 
         stack.Children.Add(SectionHeader("キャラクターパッケージ"));
         stack.Children.Add(CodeBlock("pet.json + spritesheet.webp/png を ZIP にまとめたキャラクターパッケージをインポートできます。\n標準フレーム: 192 x 208px\nアニメーション行: idle, walk, run_left, wave, jump, fail, sleep, sprint, sit"));

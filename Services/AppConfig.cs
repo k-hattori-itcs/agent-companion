@@ -152,7 +152,7 @@ public class AppConfig
         PetSittingDurationSeconds = PetIdleTiming.NormalizeDuration(PetSittingDurationSeconds, PetIdleTiming.DefaultSittingDurationSeconds);
         PetSleepingDurationSeconds = PetIdleTiming.NormalizeDuration(PetSleepingDurationSeconds, PetIdleTiming.DefaultSleepingDurationSeconds);
         StatusProvider = string.IsNullOrWhiteSpace(StatusProvider) ? "Codex" : StatusProvider;
-        LauncherTarget = string.IsNullOrWhiteSpace(LauncherTarget) ? "Codex" : LauncherTarget;
+        LauncherTarget = ClaudeDesktopLauncherService.NormalizeLauncherTarget(LauncherTarget);
     }
 
     private void CopyFrom(AppConfig other)

@@ -33,7 +33,7 @@ spritesheet から切り出したキャラクタープレビューを使った�
 - Claude は短期枠と週間枠の2重リング表示に対応
 - AIの状態に応じて作業中・完了・エラーのキャラクター動作を切替
 - キャラクターをドラッグして移動
-- ダブルクリックで Codex または VSCode を起動/前面表示
+- ダブルクリックで Codex / VSCode / Claude Desktop を起動/前面表示
 - Koharu / Luna / Natsuki のキャラクター切替
 - タスクトレイから表示/非表示、設定、終了を操作
 - タスクトレイで `設定` を選んだモニターの、選択位置直上へ設定画面を表示
@@ -74,9 +74,9 @@ Koharu の実際のspritesheetから切り出した静止プレビューです�
 1. `AgentCompanion.exe` を起動します。
 2. タスクトレイの AgentCompanion アイコンを右クリックして `設定` を開きます。
 3. `接続` タブで `状況を読む対象` を `Codex` または `Claude` に設定します。
-4. `ダブルクリックで開くアプリ` を `Codex` または `VSCode` に設定します。
+4. `ダブルクリックで開くアプリ` を `Codex`、`VSCode`、または `Claude Desktop` に設定します。
 5. 必要に応じて `Windows起動時にこの AgentCompanion を起動する` を有効にします。
-6. Claude を監視する場合は `Claude ホーム` と `VSCode ワークスペース` を確認します。
+6. Claude を監視する場合は `Claude ホーム` を確認し、起動先が `VSCode` の場合だけ `VSCode ワークスペース` も設定します。
 
 詳しい手順は [SETUP.md](./SETUP.md) を参照してください。
 
@@ -85,7 +85,7 @@ Koharu の実際のspritesheetから切り出した静止プレビューです�
 | 操作 | 動作 |
 | --- | --- |
 | 左ドラッグ | キャラクターを移動 |
-| ダブルクリック | Codex / VSCode を開く、または前面に表示 |
+| ダブルクリック | Codex / VSCode / Claude Desktop を開く、または前面に表示 |
 | タスクトレイ右クリック | 表示/非表示、設定、終了 |
 | `AgentCompanion.exe --settings` | 設定画面を直接開いて起動 |
 | 終了後の再起動 | 配置したフォルダの `AgentCompanion.exe` をもう一度実行 |
@@ -105,9 +105,15 @@ Windows 起動時に自動起動したい場合は、`設定` -> `接続` -> `Wi
 
 ## Codex / Claude の違い
 
-AgentCompanion は1つのアプリです。設定画面の `StatusProvider` と `LauncherTarget` によって、Codex / Claude などの接続プロファイルを切り替えます。設定ファイルは `%LOCALAPPDATA%\AgentCompanion\instances\<instance-id>\pet_config.json` に保存されます。
+AgentCompanion は1つのアプリです。設定画面の `StatusProvider` と `LauncherTarget` によって、Codex / Claude などの接続プロファイルとダブルクリックの起動先を切り替えます。起動先は `Codex`、`VSCode`、`Claude Desktop` から選べます。設定ファイルは `%LOCALAPPDATA%\AgentCompanion\instances\<instance-id>\pet_config.json` に保存されます。
 
 2つを同時に使う場合は、アプリフォルダを `AgentCompanion-Codex` と `AgentCompanion-Claude` のように2つに分けてください。フォルダ名は任意です。実行フォルダのフルパスから個別の `<instance-id>` が作られるため、接続先プロファイルとキャラクターの見た目を別々に設定できます。実行フォルダを移動すると別プロファイルとして扱われます。
+
+### Claude Desktop を開く
+
+`ダブルクリックで開くアプリ` に `Claude Desktop` を選ぶと、起動済みの Claude Desktop を前面に表示し、未起動ならWindowsに登録されたClaude Desktopアプリを起動します。Claude DesktopがWindowsへインストール済みであることが前提です。
+
+これは起動・前面表示だけの機能です。状況の吹き出しと利用量リングは、引き続き Claude Code CLI のローカル履歴・利用量情報を読み取ります。
 
 ### Claude 監視の前提と制限
 
