@@ -29,9 +29,10 @@ public static class LauncherTargets
 
     public static string GetDisplayName(string? launcherTarget)
     {
-        return Normalize(launcherTarget) == ClaudeDesktop
+        var normalizedTarget = Normalize(launcherTarget);
+        return normalizedTarget == ClaudeDesktop
             ? ClaudeDesktopDisplayName
-            : Normalize(launcherTarget);
+            : normalizedTarget;
     }
 
     public static string FromDisplayName(string? displayName)

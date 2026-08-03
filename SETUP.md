@@ -62,12 +62,12 @@ Codex の状況は `%USERPROFILE%\.codex\sessions\**\rollout-*.jsonl` から読�
 1. タスクトレイの AgentCompanion アイコンを右クリックして `設定` を開きます。
 2. `接続` タブを開きます。
 3. `状況を読む対象` を `Claude` にします。
-4. `ダブルクリックで開くアプリ` を `VSCode` または `Claude Desktop` にします。
+4. `ダブルクリックで開くアプリ` を `VSCode` または `Claude Desk` にします。
 5. `Claude ホーム` を通常は `C:\Users\<user>\.claude` にします。
-6. 起動先に `VSCode` を選んだ場合は、`VSCode ワークスペース` を Claude Code を開くフォルダにします。`Claude Desktop` を選んだ場合は、WindowsのStartメニューからClaude Desktopを起動できることを確認します。
+6. 起動先に `VSCode` を選んだ場合は、`VSCode ワークスペース` を Claude Code を開くフォルダにします。`Claude Desk` を選んだ場合は、WindowsのStartメニューからClaude Deskを起動できることを確認します。
 7. 設定画面のバッジが `Claude監視` になっていることを確認します。
 
-Claude Desktop を選んだ場合も、起動先だけがClaude Desktopへ変わります。状況の吹き出しと利用量リングは、Claude Code CLI の `.claude\projects\**\*.jsonl` と利用量情報を読みます。利用量はClaude Code OAuthの利用状況APIを優先し、取得できない場合は `~/.claude/agentcompanion-rate-limits.json`（旧名 `agentpet-rate-limits.json` も可）、最後にローカル履歴の推定値へ切り替わります。
+Claude Desk を選んだ場合も、起動先だけがClaude Deskへ変わります。状況の吹き出しと利用量リングは、Claude Code CLI の `.claude\projects\**\*.jsonl` と利用量情報を読みます。利用量はClaude Code OAuthの利用状況APIを優先し、取得できない場合は `~/.claude/agentcompanion-rate-limits.json`（旧名 `agentpet-rate-limits.json` も可）、最後にローカル履歴の推定値へ切り替わります。
 
 
 ### Claude の5時間/週間リングを公式表示に近づける
@@ -167,9 +167,9 @@ AgentCompanion を配置したフォルダの `AgentCompanion.exe` を実行し�
 
 Claude CodeのOAuth利用状況APIを20秒間隔で確認します。起動直後は取得まで数秒かかることがあります。API取得に失敗した場合はstatusline由来の `~/.claude/agentcompanion-rate-limits.json`、その次にJSONL推定へ切り替わります。推定表示には `5h~` / `W~` が付きます。
 
-### Codex / VSCode / Claude Desktop が開かない
+### Codex / VSCode / Claude Desk が開かない
 
-設定の `ダブルクリックで開くアプリ` と、Codex / VSCode / Claude Desktop のインストール状態を確認してください。Claude Desktop はWindowsのStartメニューから起動できる状態である必要があります。
+設定の `ダブルクリックで開くアプリ` と、Codex / VSCode / Claude Desk のインストール状態を確認してください。Claude Desk はWindowsのStartメニューから起動できる状態である必要があります。
 
 ## 10. プライバシーとログ
 

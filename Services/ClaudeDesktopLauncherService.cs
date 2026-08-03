@@ -15,29 +15,40 @@ public sealed class ClaudeDesktopLauncherService
     private static readonly Regex ClaudeAumidPattern = new(
         "^Claude_[A-Za-z0-9]+![A-Za-z0-9._-]+$",
         RegexOptions.CultureInvariant);
+    private string? _cachedAppUserModelId;
+    private int _launchInProgress;
 
     public void OpenOrFocus(Action<string> reportFailure)
     {
         ArgumentNullException.ThrowIfNull(reportFailure);
 
-        if (TryFocusClaudeDesktopWindow())
+        if (TryFocusClaudeDesktopWindow() || Interlocked.Exchange(ref _launchInProgress, 1) != 0)
             return;
 
-        var appUserModelId = FindClaudeDesktopAppUserModelId();
-        if (appUserModelId == null)
-        {
-            ReportFailure(reportFailure, "Claude Desktop のインストールを確認してください。");
-            return;
-        }
+        _ = OpenOrFocusAsync(reportFailure);
+    }
 
-        if (!TryLaunchClaudeDesktopApp(appUserModelId))
+    private async Task OpenOrFocusAsync(Action<string> reportFailure)
+    {
+        try
         {
-            ReportFailure(reportFailure, "Claude Desktop を起動できませんでした。アプリの再インストールを確認してください。");
-            return;
-        }
+            var appUserModelId = _cachedAppUserModelId
+                ?? await Task.Run(FindClaudeDesktopAppUserModelId).ConfigureAwait(false);
+            if (appUserModelId == null)
+            {
+                ReportFailure(reportFailure, "Claude Desktop のインストールを確認してください。");
+                return;
+            }
 
-        _ = Task.Run(async () =>
-        {
+            _cachedAppUserModelId = appUserModelId;
+            if (TryFocusClaudeDesktopWindow())
+                return;
+            if (!TryLaunchClaudeDesktopApp(appUserModelId))
+            {
+                ReportFailure(reportFailure, "Claude Desktop を起動できませんでした。アプリの再インストールを確認してください。");
+                return;
+            }
+
             for (var i = 0; i < LaunchVerificationAttempts; i++)
             {
                 await Task.Delay(LaunchVerificationDelayMilliseconds).ConfigureAwait(false);
@@ -45,8 +56,13 @@ public sealed class ClaudeDesktopLauncherService
                     return;
             }
 
+            _cachedAppUserModelId = null;
             ReportFailure(reportFailure, "Claude Desktop を起動または前面表示できませんでした。アプリを手動で起動してから、もう一度試してください。");
-        });
+        }
+        finally
+        {
+            Volatile.Write(ref _launchInProgress, 0);
+        }
     }
 
     internal static string? ExtractClaudeDesktopAppUserModelId(string? startAppsOutput)
