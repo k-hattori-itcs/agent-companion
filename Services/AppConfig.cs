@@ -25,7 +25,8 @@ public class AppConfig
     public bool ShowTokenRing { get; set; } = true;
     public long DailyTokenLimit { get; set; } = 200_000;
     public string StatusProvider { get; set; } = "Codex";
-    public string LauncherTarget { get; set; } = "Codex";
+    public string LauncherTarget { get; set; } = LauncherTargets.Codex;
+    public int LauncherTargetConfigurationVersion { get; set; }
     public string ClaudeHomePath { get; set; } = "";
     public bool ClaudeUsageApiEnabled { get; set; }
     public string ClaudeUsageCacheHome { get; set; } = "";
@@ -152,7 +153,8 @@ public class AppConfig
         PetSittingDurationSeconds = PetIdleTiming.NormalizeDuration(PetSittingDurationSeconds, PetIdleTiming.DefaultSittingDurationSeconds);
         PetSleepingDurationSeconds = PetIdleTiming.NormalizeDuration(PetSleepingDurationSeconds, PetIdleTiming.DefaultSleepingDurationSeconds);
         StatusProvider = string.IsNullOrWhiteSpace(StatusProvider) ? "Codex" : StatusProvider;
-        LauncherTarget = ClaudeDesktopLauncherService.NormalizeLauncherTarget(LauncherTarget);
+        LauncherTarget = LauncherTargets.MigrateLegacyTarget(StatusProvider, LauncherTarget, LauncherTargetConfigurationVersion);
+        LauncherTargetConfigurationVersion = LauncherTargets.CurrentConfigurationVersion;
     }
 
     private void CopyFrom(AppConfig other)
@@ -172,6 +174,7 @@ public class AppConfig
         DailyTokenLimit = other.DailyTokenLimit;
         StatusProvider = other.StatusProvider;
         LauncherTarget = other.LauncherTarget;
+        LauncherTargetConfigurationVersion = other.LauncherTargetConfigurationVersion;
         ClaudeHomePath = other.ClaudeHomePath ?? "";
         ClaudeUsageApiEnabled = other.ClaudeUsageApiEnabled;
         ClaudeUsageCacheHome = other.ClaudeUsageCacheHome ?? "";

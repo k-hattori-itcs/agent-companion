@@ -115,6 +115,8 @@ AgentCompanion は1つのアプリです。設定画面の `StatusProvider` と 
 
 これは起動・前面表示だけの機能です。状況の吹き出しと利用量リングは、引き続き Claude Code CLI のローカル履歴・利用量情報を読み取ります。
 
+Claude Desktop の起動先は Windows のスタートアプリ一覧から実行時に検出します。アプリが見つからない、または起動後に前面表示できない場合は、画面上に通知を表示します。
+
 ### Claude 監視の前提と制限
 
 Claude 監視は、VSCode 内で動く Claude Code CLI が出力するローカル履歴を対象にしています。状況表示は `Claude ホーム` 配下の `projects/**/*.jsonl` を読みます。利用量リングは、設定で明示的に有効化した場合だけ、Claude Code のOAuth認証を使ってAnthropicの利用状況APIから5時間枠・週間枠を取得します。

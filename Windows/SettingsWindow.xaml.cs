@@ -524,10 +524,10 @@ public partial class SettingsWindow : Window
         stack.Children.Add(startupRow);
         stack.Children.Add(Paragraph($"起動先: {_startupService.ExecutablePath}"));
         stack.Children.Add(Label("ダブルクリックで開くアプリ"));
-        stack.Children.Add(MakeChoiceRow(new[] { "Codex", "VSCode", "Claude Desk" }, _app?.Config.LauncherTarget == "ClaudeDesktop" ? "Claude Desk" : _app?.Config.LauncherTarget ?? "Codex", value =>
+        stack.Children.Add(MakeChoiceRow(new[] { LauncherTargets.Codex, LauncherTargets.VSCode, LauncherTargets.ClaudeDesktopDisplayName }, LauncherTargets.GetDisplayName(_app?.Config.LauncherTarget), value =>
         {
             if (_app?.Config == null) return;
-            _app.Config.LauncherTarget = value == "Claude Desk" ? "ClaudeDesktop" : value;
+            _app.Config.LauncherTarget = LauncherTargets.FromDisplayName(value);
             _app.Config.Save();
         }));
 

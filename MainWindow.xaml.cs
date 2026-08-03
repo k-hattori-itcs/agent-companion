@@ -820,11 +820,17 @@ public partial class MainWindow : Window
     private void OpenOrFocusAgent()
     {
         if (IsClaudeDesktopLauncher())
-            _claudeDesktopLauncher.OpenOrFocus();
+            _claudeDesktopLauncher.OpenOrFocus(ShowClaudeDesktopLaunchFailure);
         else if (IsVSCodeLauncher())
             _vsCodeLauncher.OpenOrFocus(_app.Config.VSCodeWorkspacePath);
         else
             _codexLauncher.OpenOrFocus();
+    }
+
+    private void ShowClaudeDesktopLaunchFailure(string message)
+    {
+        _ = Dispatcher.BeginInvoke(() =>
+            MessageBox.Show(this, message, "Claude Desk", MessageBoxButton.OK, MessageBoxImage.Warning));
     }
 
     private bool IsClaudeProvider()
@@ -834,12 +840,12 @@ public partial class MainWindow : Window
 
     private bool IsVSCodeLauncher()
     {
-        return _app.Config.LauncherTarget.Equals("VSCode", StringComparison.OrdinalIgnoreCase);
+        return _app.Config.LauncherTarget.Equals(LauncherTargets.VSCode, StringComparison.Ordinal);
     }
 
     private bool IsClaudeDesktopLauncher()
     {
-        return _app.Config.LauncherTarget.Equals("ClaudeDesktop", StringComparison.OrdinalIgnoreCase);
+        return _app.Config.LauncherTarget.Equals(LauncherTargets.ClaudeDesktop, StringComparison.Ordinal);
     }
 
     private static bool LooksLikeWaiting(string text)

@@ -12,14 +12,35 @@ public sealed class ClaudeDesktopLauncherServiceTests
     [InlineData("Codex", "Codex")]
     [InlineData("unknown", "Codex")]
     [InlineData(null, "Codex")]
-    public void NormalizeLauncherTarget_ReturnsSupportedCanonicalValue(string? input, string expected)
+    public void Normalize_ReturnsSupportedCanonicalValue(string? input, string expected)
     {
-        Assert.Equal(expected, ClaudeDesktopLauncherService.NormalizeLauncherTarget(input));
+        Assert.Equal(expected, LauncherTargets.Normalize(input));
+    }
+
+    [Theory]
+    [InlineData("Claude_pzs8sxrjxfjjc!Claude\r\n", "Claude_pzs8sxrjxfjjc!Claude")]
+    [InlineData("Other_abc!App\nClaude_abc123!Claude\n", "Claude_abc123!Claude")]
+    [InlineData("Claude_abc!Invalid Value", null)]
+    [InlineData("", null)]
+    [InlineData(null, null)]
+    public void ExtractClaudeDesktopAppUserModelId_ReturnsOnlyValidClaudeAumid(string? output, string? expected)
+    {
+        Assert.Equal(expected, ClaudeDesktopLauncherService.ExtractClaudeDesktopAppUserModelId(output));
     }
 
     [Fact]
-    public void ClaudeDesktopAppUserModelId_UsesRegisteredWindowsDesktopIdentity()
+    public void MigrateLegacyTarget_MapsClaudeMonitoringFromCodexToVSCode()
     {
-        Assert.Equal("Claude_pzs8sxrjxfjjc!Claude", ClaudeDesktopLauncherService.ClaudeDesktopAppUserModelId);
+        var migrated = LauncherTargets.MigrateLegacyTarget("Claude", "Codex", configurationVersion: 0);
+
+        Assert.Equal(LauncherTargets.VSCode, migrated);
+    }
+
+    [Fact]
+    public void MigrateLegacyTarget_PreservesAnExplicitCurrentTarget()
+    {
+        var target = LauncherTargets.MigrateLegacyTarget("Claude", "Codex", LauncherTargets.CurrentConfigurationVersion);
+
+        Assert.Equal(LauncherTargets.Codex, target);
     }
 }
