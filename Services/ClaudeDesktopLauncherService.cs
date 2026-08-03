@@ -36,7 +36,7 @@ public sealed class ClaudeDesktopLauncherService
                 ?? await Task.Run(FindClaudeDesktopAppUserModelId).ConfigureAwait(false);
             if (appUserModelId == null)
             {
-                ReportFailure(reportFailure, "Claude Desktop のインストールを確認してください。");
+                ReportFailure(reportFailure, "Claude Desk のインストールを確認してください。");
                 return;
             }
 
@@ -45,7 +45,7 @@ public sealed class ClaudeDesktopLauncherService
                 return;
             if (!TryLaunchClaudeDesktopApp(appUserModelId))
             {
-                ReportFailure(reportFailure, "Claude Desktop を起動できませんでした。アプリの再インストールを確認してください。");
+                ReportFailure(reportFailure, "Claude Desk を起動できませんでした。アプリの再インストールを確認してください。");
                 return;
             }
 
@@ -57,7 +57,7 @@ public sealed class ClaudeDesktopLauncherService
             }
 
             _cachedAppUserModelId = null;
-            ReportFailure(reportFailure, "Claude Desktop を起動または前面表示できませんでした。アプリを手動で起動してから、もう一度試してください。");
+            ReportFailure(reportFailure, "Claude Desk を起動または前面表示できませんでした。アプリを手動で起動してから、もう一度試してください。");
         }
         finally
         {
@@ -85,7 +85,7 @@ public sealed class ClaudeDesktopLauncherService
             "powershell.exe");
         if (!File.Exists(powerShellPath))
         {
-            AppLogger.Warning("Windows PowerShell was not found while looking up Claude Desktop.");
+            AppLogger.Warning("Windows PowerShell was not found while looking up Claude Desk.");
             return null;
         }
 
@@ -114,7 +114,7 @@ public sealed class ClaudeDesktopLauncherService
             if (!process.WaitForExit(StartAppsQueryTimeoutMilliseconds))
             {
                 process.Kill(entireProcessTree: true);
-                AppLogger.Warning("Claude Desktop lookup timed out.");
+                AppLogger.Warning("Claude Desk lookup timed out.");
                 return null;
             }
 
@@ -123,7 +123,7 @@ public sealed class ClaudeDesktopLauncherService
         }
         catch (Exception ex)
         {
-            AppLogger.Error("Claude Desktop lookup failed.", ex);
+            AppLogger.Error("Claude Desk lookup failed.", ex);
             return null;
         }
     }
@@ -149,7 +149,7 @@ public sealed class ClaudeDesktopLauncherService
         }
         catch (Exception ex)
         {
-            AppLogger.Error("Claude Desktop launch failed.", ex);
+            AppLogger.Error("Claude Desk launch failed.", ex);
             return false;
         }
     }
