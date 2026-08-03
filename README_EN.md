@@ -7,11 +7,13 @@ AgentCompanion is a Windows desktop companion app that shows Codex / Claude acti
 
 It is a customized derivative of [sugar301/TokenPet](https://github.com/sugar301/TokenPet). AgentCompanion adds local Codex / Claude status monitoring, always-visible token rings, app launch/focus behavior, Japanese settings UI, and bundled Koharu / Luna / Natsuki characters.
 
-## v1.0.0
+## v1.1.0
 
-- v2 character packages are validated against the sprite-atlas contract before an existing character is replaced.
-- v2 requires a 1536x2288 image with 192x208 cells in an 8-column, 11-row grid; rows 0-8 contain the nine standard runtime animations.
-- Regression tests cover the bundled Natsuki atlas and preservation of v2 metadata during import.
+- Adds `Claude Desk` as a double-click launch target. It starts Claude Desktop when needed and focuses it when already running.
+- Resolves Claude Desk from the Windows Start Apps list at runtime, without relying on a device-specific app identifier.
+- Refreshes expiring Claude Code OAuth credentials before usage requests, and retries a 401 response once after a successful refresh.
+- Persists API `Retry-After` limits after a 429 response so restarting the app does not bypass the requested wait.
+- Migrates existing Claude monitoring settings to retain the previous VSCode launch behavior on first load.
 
 ## UI Images
 
