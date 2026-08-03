@@ -35,6 +35,8 @@ public class AppConfig
     public double? ClaudeSevenDayUsagePercent { get; set; }
     public DateTimeOffset? ClaudeSevenDayResetsAt { get; set; }
     public DateTimeOffset? ClaudeUsageCachedAt { get; set; }
+    public string ClaudeUsageApiRetryHome { get; set; } = "";
+    public DateTimeOffset? ClaudeUsageApiNextAttemptAt { get; set; }
     public string VSCodeWorkspacePath { get; set; } = "";
     public long ClaudeShortWindowTokenLimit { get; set; } = 3_640_000;
     public long ClaudeWeeklyTokenLimit { get; set; } = 562_000_000;
@@ -183,6 +185,8 @@ public class AppConfig
         ClaudeSevenDayUsagePercent = other.ClaudeSevenDayUsagePercent;
         ClaudeSevenDayResetsAt = other.ClaudeSevenDayResetsAt;
         ClaudeUsageCachedAt = other.ClaudeUsageCachedAt;
+        ClaudeUsageApiRetryHome = other.ClaudeUsageApiRetryHome ?? "";
+        ClaudeUsageApiNextAttemptAt = other.ClaudeUsageApiNextAttemptAt;
         VSCodeWorkspacePath = other.VSCodeWorkspacePath ?? "";
         ClaudeShortWindowTokenLimit = other.ClaudeShortWindowTokenLimit;
         ClaudeWeeklyTokenLimit = other.ClaudeWeeklyTokenLimit;

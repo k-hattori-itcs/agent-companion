@@ -119,7 +119,7 @@ Claude Desk の起動先は Windows のスタートアプリ一覧から実行�
 
 ### Claude 監視の前提と制限
 
-Claude 監視は、VSCode 内で動く Claude Code CLI が出力するローカル履歴を対象にしています。状況表示は `Claude ホーム` 配下の `projects/**/*.jsonl` を読みます。利用量リングは、設定で明示的に有効化した場合だけ、Claude Code のOAuth認証を使ってAnthropicの利用状況APIから5時間枠・週間枠を取得します。
+Claude 監視は、VSCode 内で動く Claude Code CLI が出力するローカル履歴を対象にしています。状況表示は `Claude ホーム` 配下の `projects/**/*.jsonl` を読みます。利用量リングは、設定で明示的に有効化した場合だけ、Claude Code のOAuth認証を使ってAnthropicの利用状況APIから5時間枠・週間枠を取得します。成功時は15分間隔、通常失敗時は5分後、429時はサーバーの `Retry-After` 後に再試行します。待機期限は再起動後も保持します。
 
 利用率の優先順位:
 
@@ -132,7 +132,7 @@ Claude 監視は、VSCode 内で動く Claude Code CLI が出力するローカ�
 - Claude Web、Claude Desk、VSCode拡張の独自UIだけの作業状態は直接監視しません。ただし、Claude Codeと共有される契約利用率は利用状況APIの値に含まれます。
 - Claude Code CLI の履歴JSONLが書かれない環境では、状況の吹き出しは更新されません。
 - 利用状況APIはClaude Codeが使用する非公開エンドポイントのため、Claude Code側の変更で取得できなくなる可能性があります。その場合はstatusline値またはJSONL推定へ自動的に切り替わります。
-- API取得にはClaude Codeが `Claude.ai` のOAuthでログイン済みである必要があります。認証トークンは表示・複製・保存・ログ出力しません。
+- API取得にはClaude Codeが `Claude.ai` のOAuthでログイン済みである必要があります。期限切れまたは期限が近い場合は、Claude Codeの更新トークンでアクセストークンを更新します。AgentCompanionはトークンを自分の設定へ複製・保存せず、表示・ログ出力もしません。更新成功時だけ、Claude Codeと共有する `.credentials.json` の値を原子的に更新します。
 - `Claude ホーム` や `VSCode ワークスペース` が既定と違う場合は、設定画面で明示してください。
 
 ## キャラクターについて
@@ -194,7 +194,7 @@ publish 後は作成したフォルダの `AgentCompanion.exe` を起動しま�
 AgentCompanion は独自テレメトリを送信せず、状況要約のために外部LLMを呼び出しません。Claude監視で利用量APIを明示的に有効化した場合だけ、利用率取得のためClaude CodeのOAuth認証で `https://api.anthropic.com/api/oauth/usage` へ読み取り専用のGETリクエストを送ります。次のデータを扱います。
 
 - Codex監視では `%USERPROFILE%/.codex/sessions/**/rollout-*.jsonl` を読みます。
-- Claude監視では、設定したClaudeホーム内の `projects/**/*.jsonl`、`.credentials.json` 内のClaude Code OAuthアクセストークン、存在する場合は `agentcompanion-rate-limits.json` を読みます。アクセストークンはAnthropicの利用状況APIへの認証だけに使い、保存・ログ出力しません。
+- Claude監視では、設定したClaudeホーム内の `projects/**/*.jsonl`、`.credentials.json` 内のClaude Code OAuthアクセストークン・更新トークン・有効期限、存在する場合は `agentcompanion-rate-limits.json` を読みます。アクセストークンはAnthropicの利用状況APIへの認証だけに使い、AgentCompanionの設定・表示・ログには保存しません。更新成功時だけ、Claude Codeと共有する `.credentials.json` の値を原子的に更新します。
 - 設定、トークン履歴、proxy転送先、キャラクターデータは `%LOCALAPPDATA%\AgentCompanion\instances\<instance-id>` に保存します。
 - 障害ログは同じユーザーデータフォルダ内の `agentcompanion.log` に保存し、1MBでローテーションします。proxyデバッグログは設定で明示的に有効にした場合だけ `debug.log` に保存し、2MBでローテーションします。
 - API proxyは明示的に有効にした場合だけ `127.0.0.1` で待ち受けます。Authorizationヘッダを上流APIへ転送しますが、キーや本文を履歴・ログへ保存しません。上流TLS証明書を標準検証し、未知のprefixは別の転送先へフォールバックせず拒否します。proxyはContent-Length形式のOpenAI互換JSON API専用で、Transfer-EncodingとHTTP pipeliningは拒否します。

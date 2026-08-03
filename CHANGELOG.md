@@ -4,6 +4,13 @@
 
 公開開始版は 1.0.0 です。
 
+## Unreleased
+
+- Claude Code OAuth利用量取得で、期限切れ・期限間近の資格情報を更新してから利用量を問い合わせるよう改善
+- 401時は資格情報更新後に利用量APIを一度だけ再試行し、429の Retry-After を再起動後も保持
+- Claude Code CLI、Claude Desk、Codexの監視・認証経路を見直し、OAuth通信はClaude Code CLIの明示的な利用量取得に限定
+
+
 ## 1.1.0 - 2026-08-03
 
 - ダブルクリックの起動先に `Claude Desk` を追加。Claude Desktop が未起動なら起動し、起動済みなら前面に表示

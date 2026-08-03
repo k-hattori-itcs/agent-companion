@@ -72,7 +72,7 @@ For a v2 8x11 spritesheet, set spriteVersionNumber: 2 and supply a 1536x2288 ima
 
 ## Claude Monitoring Limitations
 
-Claude monitoring targets local history written by Claude Code CLI, including sessions launched from the VSCode integrated terminal. AgentCompanion reads `projects/**/*.jsonl` for activity status. Exact five-hour and weekly utilization from Anthropic is requested only after the user explicitly enables the Claude Code OAuth usage API setting.
+Claude monitoring targets local history written by Claude Code CLI, including sessions launched from the VSCode integrated terminal. AgentCompanion reads `projects/**/*.jsonl` for activity status. Exact five-hour and weekly utilization from Anthropic is requested only after the user explicitly enables the Claude Code OAuth usage API setting. Successful API refreshes run every 15 minutes; ordinary failures retry after five minutes, while 429 responses honor `Retry-After` across restarts.
 
 Limitations:
 
@@ -83,7 +83,7 @@ Limitations:
 
 ## Privacy and local data
 
-AgentCompanion sends no product telemetry and does not call an external LLM to summarize activity. Codex monitoring reads `%USERPROFILE%/.codex/sessions/**/rollout-*.jsonl`. Claude monitoring reads local Claude Code history. Only when the user explicitly enables the Claude Code OAuth usage API setting does it read the OAuth credential and send a read-only authenticated GET request to `https://api.anthropic.com/api/oauth/usage`. The OAuth token is never copied, persisted, or logged by AgentCompanion.
+AgentCompanion sends no product telemetry and does not call an external LLM to summarize activity. Codex monitoring reads `%USERPROFILE%/.codex/sessions/**/rollout-*.jsonl`. Claude monitoring reads local Claude Code history. Only when the user explicitly enables the Claude Code OAuth usage API setting does it read the OAuth credential and send a read-only authenticated GET request to `https://api.anthropic.com/api/oauth/usage`. AgentCompanion never copies OAuth tokens into its own configuration, display, or logs. When a refresh succeeds, it atomically updates the shared Claude Code `.credentials.json` entry so rotated credentials remain usable by Claude Code.
 
 Settings, token history, proxy targets, character packages, and logs stay under `%LOCALAPPDATA%/AgentCompanion/instances/<instance-id>`. The instance ID is derived from the executable folder path, so separate Codex and Claude folders keep independent profiles. `agentcompanion.log` is capped and rotated at 1 MB. `debug.log` is written only when proxy debug logging is explicitly enabled and is rotated at 2 MB.
 

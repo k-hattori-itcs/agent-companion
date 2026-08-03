@@ -12,4 +12,12 @@ public sealed class AppConfigTests
 
         Assert.False(config.ClaudeUsageApiEnabled);
     }
+
+    [Fact]
+    public void ClaudeUsageApi_NextAttemptIsNotScheduledByDefault()
+    {
+        var config = new AppConfig();
+
+        Assert.Null(config.ClaudeUsageApiNextAttemptAt);
+    }
 }

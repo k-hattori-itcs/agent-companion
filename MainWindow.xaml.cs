@@ -617,21 +617,38 @@ public partial class MainWindow : Window
             _app.Config.ClaudeFiveHourResetsAt,
             _app.Config.ClaudeSevenDayUsagePercent,
             _app.Config.ClaudeSevenDayResetsAt,
-            _app.Config.ClaudeUsageCachedAt);
+            _app.Config.ClaudeUsageCachedAt,
+            _app.Config.ClaudeUsageApiRetryHome,
+            _app.Config.ClaudeUsageApiNextAttemptAt);
     }
 
     private void PersistClaudeUsageCache()
     {
         var cache = _claudeStatus.GetCachedApiUsage();
-        if (cache == null || _app.Config.ClaudeUsageCachedAt >= cache.FetchedAtUtc)
+        var schedule = _claudeStatus.GetApiUsageSchedule();
+        var cacheChanged = cache != null && _app.Config.ClaudeUsageCachedAt < cache.FetchedAtUtc;
+        var scheduleChanged = schedule != null
+            && (!string.Equals(_app.Config.ClaudeUsageApiRetryHome, schedule.ClaudeHome, StringComparison.OrdinalIgnoreCase)
+                || _app.Config.ClaudeUsageApiNextAttemptAt != schedule.NextAttemptAtUtc);
+        if (!cacheChanged && !scheduleChanged)
             return;
 
-        _app.Config.ClaudeUsageCacheHome = cache.ClaudeHome;
-        _app.Config.ClaudeFiveHourUsagePercent = cache.Response.FiveHourPercent;
-        _app.Config.ClaudeFiveHourResetsAt = cache.Response.FiveHourResetsAt;
-        _app.Config.ClaudeSevenDayUsagePercent = cache.Response.SevenDayPercent;
-        _app.Config.ClaudeSevenDayResetsAt = cache.Response.SevenDayResetsAt;
-        _app.Config.ClaudeUsageCachedAt = cache.FetchedAtUtc;
+        if (cacheChanged && cache != null)
+        {
+            _app.Config.ClaudeUsageCacheHome = cache.ClaudeHome;
+            _app.Config.ClaudeFiveHourUsagePercent = cache.Response.FiveHourPercent;
+            _app.Config.ClaudeFiveHourResetsAt = cache.Response.FiveHourResetsAt;
+            _app.Config.ClaudeSevenDayUsagePercent = cache.Response.SevenDayPercent;
+            _app.Config.ClaudeSevenDayResetsAt = cache.Response.SevenDayResetsAt;
+            _app.Config.ClaudeUsageCachedAt = cache.FetchedAtUtc;
+        }
+
+        if (scheduleChanged && schedule != null)
+        {
+            _app.Config.ClaudeUsageApiRetryHome = schedule.ClaudeHome;
+            _app.Config.ClaudeUsageApiNextAttemptAt = schedule.NextAttemptAtUtc;
+        }
+
         _app.Config.Save();
     }
     private static bool ShouldReactToCompletion(CodexStatusSnapshot? previousStatus, CodexStatusSnapshot currentStatus)

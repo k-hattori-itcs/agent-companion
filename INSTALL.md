@@ -55,7 +55,7 @@
 
 Claude Code の利用量を正確に表示するための API は、初期状態では無効です。使用する場合は、設定画面の `接続` タブにある `Claude Code OAuthで利用量を取得する` を有効にしてください。
 
-有効にすると、Claude ホームの `.credentials.json` から OAuth アクセストークンを読み取り、Anthropic の利用状況 API に問い合わせます。アクセストークンは保存、表示、ログ出力しません。無効のままでも、Claude Code のローカル履歴および statusline 情報から状況や利用量を表示できます。
+有効にすると、Claude ホームの `.credentials.json` から OAuth アクセストークン・更新トークン・有効期限を読み取り、Anthropic の利用状況 API に問い合わせます。期限切れまたは期限が近い場合は、更新トークンでアクセストークンを更新します。AgentCompanionはトークンを自分の設定へ保存、表示、ログ出力しませんが、更新成功時はClaude Codeと共有する `.credentials.json` の値を原子的に更新します。429応答の待機期限は再起動後も保持します。無効のままでも、Claude Code のローカル履歴および statusline 情報から状況や利用量を表示できます。
 
 ## アンインストール
 

@@ -7,11 +7,14 @@ using System.Text.RegularExpressions;
 
 namespace AgentCompanion.Services;
 
+internal sealed record ClaudeUsageApiSchedule(string ClaudeHome, DateTimeOffset NextAttemptAtUtc);
+
 public sealed class ClaudeStatusService
 {
     private static readonly TimeSpan LatestFileRefreshInterval = TimeSpan.FromSeconds(8);
     private static readonly TimeSpan UsageRefreshInterval = TimeSpan.FromSeconds(20);
     private static readonly TimeSpan ApiUsageRefreshInterval = TimeSpan.FromMinutes(15);
+    private static readonly TimeSpan ApiUsageFailureRetryInterval = TimeSpan.FromMinutes(5);
     private static readonly Regex WhitespaceRegex = new(@"\s+", RegexOptions.Compiled);
 
     private readonly string _defaultClaudeHome;
@@ -23,7 +26,7 @@ public sealed class ClaudeStatusService
     private DateTime _lastUsageRefreshUtc = DateTime.MinValue;
     private ClaudeUsageSnapshot _lastUsage = new(0, 0, null, null, null, null, null);
     private ClaudeUsageApiCache? _apiUsage;
-    private DateTime _nextApiUsageRefreshUtc = DateTime.MinValue;
+    private ClaudeUsageApiSchedule? _apiUsageSchedule;
     private CodexStatusSnapshot _lastSnapshot = new("Watching Claude", false, null, null, DateTime.MinValue, null);
 
     public ClaudeStatusService()
@@ -42,23 +45,37 @@ public sealed class ClaudeStatusService
         DateTimeOffset? fiveHourResetsAt,
         double? sevenDayPercent,
         DateTimeOffset? sevenDayResetsAt,
-        DateTimeOffset? fetchedAtUtc)
+        DateTimeOffset? fetchedAtUtc,
+        string? retryHome = null,
+        DateTimeOffset? nextAttemptAtUtc = null)
     {
-        if (string.IsNullOrWhiteSpace(claudeHome) || !fetchedAtUtc.HasValue)
-            return;
+        if (!string.IsNullOrWhiteSpace(claudeHome) && fetchedAtUtc.HasValue)
+        {
+            var response = new ClaudeUsageApiResponse(
+                fiveHourPercent,
+                fiveHourResetsAt,
+                sevenDayPercent,
+                sevenDayResetsAt);
+            var cache = new ClaudeUsageApiCache(claudeHome, response, fetchedAtUtc.Value);
+            Interlocked.CompareExchange(ref _apiUsage, cache, null);
+        }
 
-        var response = new ClaudeUsageApiResponse(
-            fiveHourPercent,
-            fiveHourResetsAt,
-            sevenDayPercent,
-            sevenDayResetsAt);
-        var cache = new ClaudeUsageApiCache(claudeHome, response, fetchedAtUtc.Value);
-        Interlocked.CompareExchange(ref _apiUsage, cache, null);
+        if (!string.IsNullOrWhiteSpace(retryHome)
+            && nextAttemptAtUtc is { } nextAttempt
+            && nextAttempt > DateTimeOffset.UtcNow)
+        {
+            Volatile.Write(ref _apiUsageSchedule, new ClaudeUsageApiSchedule(retryHome, nextAttempt));
+        }
     }
 
     internal ClaudeUsageApiCache? GetCachedApiUsage()
     {
         return Volatile.Read(ref _apiUsage);
+    }
+
+    internal ClaudeUsageApiSchedule? GetApiUsageSchedule()
+    {
+        return Volatile.Read(ref _apiUsageSchedule);
     }
     public CodexStatusSnapshot Poll(
         string? configuredClaudeHome = null,
@@ -124,26 +141,37 @@ public sealed class ClaudeStatusService
 
     private void RefreshApiUsageIfNeeded(string claudeHome)
     {
-        var now = DateTime.UtcNow;
-        if (now < _nextApiUsageRefreshUtc)
+        var now = DateTimeOffset.UtcNow;
+        var schedule = Volatile.Read(ref _apiUsageSchedule);
+        if (schedule != null
+            && string.Equals(schedule.ClaudeHome, claudeHome, StringComparison.OrdinalIgnoreCase)
+            && now < schedule.NextAttemptAtUtc)
+        {
             return;
+        }
 
-        _nextApiUsageRefreshUtc = now + ApiUsageRefreshInterval;
         if (!_apiUsageRefreshGate.TryEnter())
             return;
 
+        ScheduleApiUsageRefresh(claudeHome, now + ApiUsageRefreshInterval);
         _ = Task.Run(async () =>
         {
             try
             {
                 var result = await _usageApiClient.FetchAsync(claudeHome, CancellationToken.None).ConfigureAwait(false);
                 if (result.Usage != null)
+                {
                     Volatile.Write(ref _apiUsage, new ClaudeUsageApiCache(claudeHome, result.Usage, DateTimeOffset.UtcNow));
-                _nextApiUsageRefreshUtc = DateTime.UtcNow + result.RetryAfter;
+                    ScheduleApiUsageRefresh(claudeHome, DateTimeOffset.UtcNow + ApiUsageRefreshInterval);
+                }
+                else
+                {
+                    ScheduleApiUsageRefresh(claudeHome, DateTimeOffset.UtcNow + result.RetryAfter);
+                }
             }
-            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
             {
-                _nextApiUsageRefreshUtc = DateTime.UtcNow + ApiUsageRefreshInterval;
+                ScheduleApiUsageRefresh(claudeHome, DateTimeOffset.UtcNow + ApiUsageFailureRetryInterval);
                 AppLogger.Warning($"Claude usage API refresh failed: {ex.GetType().Name}");
             }
             finally
@@ -153,6 +181,10 @@ public sealed class ClaudeStatusService
         });
     }
 
+    private void ScheduleApiUsageRefresh(string claudeHome, DateTimeOffset nextAttemptAtUtc)
+    {
+        Volatile.Write(ref _apiUsageSchedule, new ClaudeUsageApiSchedule(claudeHome, nextAttemptAtUtc));
+    }
     private void RefreshLatestTranscriptIfNeeded(string claudeHome)
     {
         var now = DateTime.UtcNow;

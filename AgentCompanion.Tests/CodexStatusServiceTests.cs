@@ -60,6 +60,29 @@ public sealed class CodexStatusServiceTests : IDisposable
         Assert.Equal(DateTimeOffset.Parse(weeklyReset, CultureInfo.InvariantCulture), snapshot.SecondaryTokenUsageResetsAt);
     }
     [Fact]
+    public void RestoreCachedApiUsage_RestoresFutureApiRetrySchedule()
+    {
+        var claudeHome = Path.Combine(_root, ".claude");
+        var nextAttempt = DateTimeOffset.UtcNow.AddMinutes(12);
+        var service = new ClaudeStatusService(claudeHome);
+
+        service.RestoreCachedApiUsage(
+            claudeHome,
+            null,
+            null,
+            null,
+            null,
+            null,
+            claudeHome,
+            nextAttempt);
+
+        var schedule = service.GetApiUsageSchedule();
+
+        Assert.NotNull(schedule);
+        Assert.Equal(claudeHome, schedule!.ClaudeHome);
+        Assert.Equal(nextAttempt, schedule.NextAttemptAtUtc);
+    }
+    [Fact]
     public void Poll_UsesRestoredApiCacheWithoutBackgroundApiRefresh()
     {
         var claudeHome = Path.Combine(_root, ".claude");
