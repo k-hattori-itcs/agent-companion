@@ -29,6 +29,7 @@ public partial class MainWindow : Window
     private readonly ClaudeStatusService _claudeStatus = new();
     private readonly CodexLauncherService _codexLauncher = new();
     private readonly VSCodeLauncherService _vsCodeLauncher = new();
+    private readonly ClaudeDesktopLauncherService _claudeDesktopLauncher = new();
     private PetState _state = PetState.Idle;
     private double _sleepTimer;
     private double _sitTimer;
@@ -616,21 +617,38 @@ public partial class MainWindow : Window
             _app.Config.ClaudeFiveHourResetsAt,
             _app.Config.ClaudeSevenDayUsagePercent,
             _app.Config.ClaudeSevenDayResetsAt,
-            _app.Config.ClaudeUsageCachedAt);
+            _app.Config.ClaudeUsageCachedAt,
+            _app.Config.ClaudeUsageApiRetryHome,
+            _app.Config.ClaudeUsageApiNextAttemptAt);
     }
 
     private void PersistClaudeUsageCache()
     {
         var cache = _claudeStatus.GetCachedApiUsage();
-        if (cache == null || _app.Config.ClaudeUsageCachedAt >= cache.FetchedAtUtc)
+        var schedule = _claudeStatus.GetApiUsageSchedule();
+        var cacheChanged = cache != null && _app.Config.ClaudeUsageCachedAt < cache.FetchedAtUtc;
+        var scheduleChanged = schedule != null
+            && (!string.Equals(_app.Config.ClaudeUsageApiRetryHome, schedule.ClaudeHome, StringComparison.OrdinalIgnoreCase)
+                || _app.Config.ClaudeUsageApiNextAttemptAt != schedule.NextAttemptAtUtc);
+        if (!cacheChanged && !scheduleChanged)
             return;
 
-        _app.Config.ClaudeUsageCacheHome = cache.ClaudeHome;
-        _app.Config.ClaudeFiveHourUsagePercent = cache.Response.FiveHourPercent;
-        _app.Config.ClaudeFiveHourResetsAt = cache.Response.FiveHourResetsAt;
-        _app.Config.ClaudeSevenDayUsagePercent = cache.Response.SevenDayPercent;
-        _app.Config.ClaudeSevenDayResetsAt = cache.Response.SevenDayResetsAt;
-        _app.Config.ClaudeUsageCachedAt = cache.FetchedAtUtc;
+        if (cacheChanged && cache != null)
+        {
+            _app.Config.ClaudeUsageCacheHome = cache.ClaudeHome;
+            _app.Config.ClaudeFiveHourUsagePercent = cache.Response.FiveHourPercent;
+            _app.Config.ClaudeFiveHourResetsAt = cache.Response.FiveHourResetsAt;
+            _app.Config.ClaudeSevenDayUsagePercent = cache.Response.SevenDayPercent;
+            _app.Config.ClaudeSevenDayResetsAt = cache.Response.SevenDayResetsAt;
+            _app.Config.ClaudeUsageCachedAt = cache.FetchedAtUtc;
+        }
+
+        if (scheduleChanged && schedule != null)
+        {
+            _app.Config.ClaudeUsageApiRetryHome = schedule.ClaudeHome;
+            _app.Config.ClaudeUsageApiNextAttemptAt = schedule.NextAttemptAtUtc;
+        }
+
         _app.Config.Save();
     }
     private static bool ShouldReactToCompletion(CodexStatusSnapshot? previousStatus, CodexStatusSnapshot currentStatus)
@@ -818,10 +836,18 @@ public partial class MainWindow : Window
 
     private void OpenOrFocusAgent()
     {
-        if (IsVSCodeLauncher())
+        if (IsClaudeDesktopLauncher())
+            _claudeDesktopLauncher.OpenOrFocus(ShowClaudeDesktopLaunchFailure);
+        else if (IsVSCodeLauncher())
             _vsCodeLauncher.OpenOrFocus(_app.Config.VSCodeWorkspacePath);
         else
             _codexLauncher.OpenOrFocus();
+    }
+
+    private void ShowClaudeDesktopLaunchFailure(string message)
+    {
+        _ = Dispatcher.BeginInvoke(() =>
+            MessageBox.Show(this, message, "Claude Desk", MessageBoxButton.OK, MessageBoxImage.Warning));
     }
 
     private bool IsClaudeProvider()
@@ -831,8 +857,12 @@ public partial class MainWindow : Window
 
     private bool IsVSCodeLauncher()
     {
-        return _app.Config.LauncherTarget.Equals("VSCode", StringComparison.OrdinalIgnoreCase)
-            || IsClaudeProvider();
+        return _app.Config.LauncherTarget.Equals(LauncherTargets.VSCode, StringComparison.Ordinal);
+    }
+
+    private bool IsClaudeDesktopLauncher()
+    {
+        return _app.Config.LauncherTarget.Equals(LauncherTargets.ClaudeDesktop, StringComparison.Ordinal);
     }
 
     private static bool LooksLikeWaiting(string text)

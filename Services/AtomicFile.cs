@@ -7,6 +7,16 @@ internal static class AtomicFile
 {
     public static void WriteAllText(string path, string content)
     {
+        WriteAllText(path, content, createBackup: true);
+    }
+
+    public static void WriteAllTextWithoutBackup(string path, string content)
+    {
+        WriteAllText(path, content, createBackup: false);
+    }
+
+    private static void WriteAllText(string path, string content, bool createBackup)
+    {
         var fullPath = Path.GetFullPath(path);
         var directory = Path.GetDirectoryName(fullPath)
             ?? throw new InvalidOperationException("The target directory could not be resolved.");
@@ -25,7 +35,10 @@ internal static class AtomicFile
 
             if (File.Exists(fullPath))
             {
-                File.Replace(temporaryPath, fullPath, backupPath, true);
+                if (createBackup)
+                    File.Replace(temporaryPath, fullPath, backupPath, true);
+                else
+                    File.Replace(temporaryPath, fullPath, null, true);
             }
             else
             {

@@ -33,7 +33,7 @@ spritesheet から切り出したキャラクタープレビューを使った�
 - Claude は短期枠と週間枠の2重リング表示に対応
 - AIの状態に応じて作業中・完了・エラーのキャラクター動作を切替
 - キャラクターをドラッグして移動
-- ダブルクリックで Codex または VSCode を起動/前面表示
+- ダブルクリックで Codex / VSCode / Claude Desk を起動/前面表示
 - Koharu / Luna / Natsuki のキャラクター切替
 - タスクトレイから表示/非表示、設定、終了を操作
 - タスクトレイで `設定` を選んだモニターの、選択位置直上へ設定画面を表示
@@ -74,9 +74,9 @@ Koharu の実際のspritesheetから切り出した静止プレビューです�
 1. `AgentCompanion.exe` を起動します。
 2. タスクトレイの AgentCompanion アイコンを右クリックして `設定` を開きます。
 3. `接続` タブで `状況を読む対象` を `Codex` または `Claude` に設定します。
-4. `ダブルクリックで開くアプリ` を `Codex` または `VSCode` に設定します。
+4. `ダブルクリックで開くアプリ` を `Codex`、`VSCode`、または `Claude Desk` に設定します。
 5. 必要に応じて `Windows起動時にこの AgentCompanion を起動する` を有効にします。
-6. Claude を監視する場合は `Claude ホーム` と `VSCode ワークスペース` を確認します。
+6. Claude を監視する場合は `Claude ホーム` を確認し、起動先が `VSCode` の場合だけ `VSCode ワークスペース` も設定します。
 
 詳しい手順は [SETUP.md](./SETUP.md) を参照してください。
 
@@ -85,7 +85,7 @@ Koharu の実際のspritesheetから切り出した静止プレビューです�
 | 操作 | 動作 |
 | --- | --- |
 | 左ドラッグ | キャラクターを移動 |
-| ダブルクリック | Codex / VSCode を開く、または前面に表示 |
+| ダブルクリック | Codex / VSCode / Claude Desk を開く、または前面に表示 |
 | タスクトレイ右クリック | 表示/非表示、設定、終了 |
 | `AgentCompanion.exe --settings` | 設定画面を直接開いて起動 |
 | 終了後の再起動 | 配置したフォルダの `AgentCompanion.exe` をもう一度実行 |
@@ -105,13 +105,21 @@ Windows 起動時に自動起動したい場合は、`設定` -> `接続` -> `Wi
 
 ## Codex / Claude の違い
 
-AgentCompanion は1つのアプリです。設定画面の `StatusProvider` と `LauncherTarget` によって、Codex / Claude などの接続プロファイルを切り替えます。設定ファイルは `%LOCALAPPDATA%\AgentCompanion\instances\<instance-id>\pet_config.json` に保存されます。
+AgentCompanion は1つのアプリです。設定画面の `StatusProvider` と `LauncherTarget` によって、Codex / Claude などの接続プロファイルとダブルクリックの起動先を切り替えます。起動先は `Codex`、`VSCode`、`Claude Desk` から選べます。設定ファイルは `%LOCALAPPDATA%\AgentCompanion\instances\<instance-id>\pet_config.json` に保存されます。
 
 2つを同時に使う場合は、アプリフォルダを `AgentCompanion-Codex` と `AgentCompanion-Claude` のように2つに分けてください。フォルダ名は任意です。実行フォルダのフルパスから個別の `<instance-id>` が作られるため、接続先プロファイルとキャラクターの見た目を別々に設定できます。実行フォルダを移動すると別プロファイルとして扱われます。
 
+### Claude Desk を開く
+
+`ダブルクリックで開くアプリ` に `Claude Desk` を選ぶと、起動済みの Claude Desk を前面に表示し、未起動ならWindowsに登録されたClaude Deskアプリを起動します。Claude DeskがWindowsへインストール済みであることが前提です。
+
+これは起動・前面表示だけの機能です。状況の吹き出しと利用量リングは、引き続き Claude Code CLI のローカル履歴・利用量情報を読み取ります。
+
+Claude Desk の起動先は Windows のスタートアプリ一覧から実行時に検出します。アプリが見つからない、または起動後に前面表示できない場合は、画面上に通知を表示します。
+
 ### Claude 監視の前提と制限
 
-Claude 監視は、VSCode 内で動く Claude Code CLI が出力するローカル履歴を対象にしています。状況表示は `Claude ホーム` 配下の `projects/**/*.jsonl` を読みます。利用量リングは、設定で明示的に有効化した場合だけ、Claude Code のOAuth認証を使ってAnthropicの利用状況APIから5時間枠・週間枠を取得します。
+Claude 監視は、VSCode 内で動く Claude Code CLI が出力するローカル履歴を対象にしています。状況表示は `Claude ホーム` 配下の `projects/**/*.jsonl` を読みます。利用量リングは、設定で明示的に有効化した場合だけ、Claude Code のOAuth認証を使ってAnthropicの利用状況APIから5時間枠・週間枠を取得します。成功時は15分間隔、通常失敗時は5分後、429時はサーバーの `Retry-After` 後に再試行します。待機期限は再起動後も保持します。
 
 利用率の優先順位:
 
@@ -121,10 +129,10 @@ Claude 監視は、VSCode 内で動く Claude Code CLI が出力するローカ�
 
 制限:
 
-- Claude Web、Claude Desktop、VSCode拡張の独自UIだけの作業状態は直接監視しません。ただし、Claude Codeと共有される契約利用率は利用状況APIの値に含まれます。
+- Claude Web、Claude Desk、VSCode拡張の独自UIだけの作業状態は直接監視しません。ただし、Claude Codeと共有される契約利用率は利用状況APIの値に含まれます。
 - Claude Code CLI の履歴JSONLが書かれない環境では、状況の吹き出しは更新されません。
 - 利用状況APIはClaude Codeが使用する非公開エンドポイントのため、Claude Code側の変更で取得できなくなる可能性があります。その場合はstatusline値またはJSONL推定へ自動的に切り替わります。
-- API取得にはClaude Codeが `Claude.ai` のOAuthでログイン済みである必要があります。認証トークンは表示・複製・保存・ログ出力しません。
+- API取得にはClaude Codeが `Claude.ai` のOAuthでログイン済みである必要があります。期限切れまたは期限が近い場合は、Claude Codeの更新トークンでアクセストークンを更新します。AgentCompanionはトークンを自分の設定へ複製・保存せず、表示・ログ出力もしません。更新成功時だけ、Claude Codeと共有する `.credentials.json` の値を原子的に更新します。
 - `Claude ホーム` や `VSCode ワークスペース` が既定と違う場合は、設定画面で明示してください。
 
 ## キャラクターについて
@@ -186,7 +194,7 @@ publish 後は作成したフォルダの `AgentCompanion.exe` を起動しま�
 AgentCompanion は独自テレメトリを送信せず、状況要約のために外部LLMを呼び出しません。Claude監視で利用量APIを明示的に有効化した場合だけ、利用率取得のためClaude CodeのOAuth認証で `https://api.anthropic.com/api/oauth/usage` へ読み取り専用のGETリクエストを送ります。次のデータを扱います。
 
 - Codex監視では `%USERPROFILE%/.codex/sessions/**/rollout-*.jsonl` を読みます。
-- Claude監視では、設定したClaudeホーム内の `projects/**/*.jsonl`、`.credentials.json` 内のClaude Code OAuthアクセストークン、存在する場合は `agentcompanion-rate-limits.json` を読みます。アクセストークンはAnthropicの利用状況APIへの認証だけに使い、保存・ログ出力しません。
+- Claude監視では、設定したClaudeホーム内の `projects/**/*.jsonl`、`.credentials.json` 内のClaude Code OAuthアクセストークン・更新トークン・有効期限、存在する場合は `agentcompanion-rate-limits.json` を読みます。アクセストークンはAnthropicの利用状況APIへの認証だけに使い、AgentCompanionの設定・表示・ログには保存しません。更新成功時だけ、Claude Codeと共有する `.credentials.json` の値を原子的に更新します。
 - 設定、トークン履歴、proxy転送先、キャラクターデータは `%LOCALAPPDATA%\AgentCompanion\instances\<instance-id>` に保存します。
 - 障害ログは同じユーザーデータフォルダ内の `agentcompanion.log` に保存し、1MBでローテーションします。proxyデバッグログは設定で明示的に有効にした場合だけ `debug.log` に保存し、2MBでローテーションします。
 - API proxyは明示的に有効にした場合だけ `127.0.0.1` で待ち受けます。Authorizationヘッダを上流APIへ転送しますが、キーや本文を履歴・ログへ保存しません。上流TLS証明書を標準検証し、未知のprefixは別の転送先へフォールバックせず拒否します。proxyはContent-Length形式のOpenAI互換JSON API専用で、Transfer-EncodingとHTTP pipeliningは拒否します。

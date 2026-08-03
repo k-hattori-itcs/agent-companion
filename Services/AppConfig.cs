@@ -25,7 +25,8 @@ public class AppConfig
     public bool ShowTokenRing { get; set; } = true;
     public long DailyTokenLimit { get; set; } = 200_000;
     public string StatusProvider { get; set; } = "Codex";
-    public string LauncherTarget { get; set; } = "Codex";
+    public string LauncherTarget { get; set; } = LauncherTargets.Codex;
+    public int LauncherTargetConfigurationVersion { get; set; }
     public string ClaudeHomePath { get; set; } = "";
     public bool ClaudeUsageApiEnabled { get; set; }
     public string ClaudeUsageCacheHome { get; set; } = "";
@@ -34,6 +35,8 @@ public class AppConfig
     public double? ClaudeSevenDayUsagePercent { get; set; }
     public DateTimeOffset? ClaudeSevenDayResetsAt { get; set; }
     public DateTimeOffset? ClaudeUsageCachedAt { get; set; }
+    public string ClaudeUsageApiRetryHome { get; set; } = "";
+    public DateTimeOffset? ClaudeUsageApiNextAttemptAt { get; set; }
     public string VSCodeWorkspacePath { get; set; } = "";
     public long ClaudeShortWindowTokenLimit { get; set; } = 3_640_000;
     public long ClaudeWeeklyTokenLimit { get; set; } = 562_000_000;
@@ -152,7 +155,8 @@ public class AppConfig
         PetSittingDurationSeconds = PetIdleTiming.NormalizeDuration(PetSittingDurationSeconds, PetIdleTiming.DefaultSittingDurationSeconds);
         PetSleepingDurationSeconds = PetIdleTiming.NormalizeDuration(PetSleepingDurationSeconds, PetIdleTiming.DefaultSleepingDurationSeconds);
         StatusProvider = string.IsNullOrWhiteSpace(StatusProvider) ? "Codex" : StatusProvider;
-        LauncherTarget = string.IsNullOrWhiteSpace(LauncherTarget) ? "Codex" : LauncherTarget;
+        LauncherTarget = LauncherTargets.MigrateLegacyTarget(StatusProvider, LauncherTarget, LauncherTargetConfigurationVersion);
+        LauncherTargetConfigurationVersion = LauncherTargets.CurrentConfigurationVersion;
     }
 
     private void CopyFrom(AppConfig other)
@@ -172,6 +176,7 @@ public class AppConfig
         DailyTokenLimit = other.DailyTokenLimit;
         StatusProvider = other.StatusProvider;
         LauncherTarget = other.LauncherTarget;
+        LauncherTargetConfigurationVersion = other.LauncherTargetConfigurationVersion;
         ClaudeHomePath = other.ClaudeHomePath ?? "";
         ClaudeUsageApiEnabled = other.ClaudeUsageApiEnabled;
         ClaudeUsageCacheHome = other.ClaudeUsageCacheHome ?? "";
@@ -180,6 +185,8 @@ public class AppConfig
         ClaudeSevenDayUsagePercent = other.ClaudeSevenDayUsagePercent;
         ClaudeSevenDayResetsAt = other.ClaudeSevenDayResetsAt;
         ClaudeUsageCachedAt = other.ClaudeUsageCachedAt;
+        ClaudeUsageApiRetryHome = other.ClaudeUsageApiRetryHome ?? "";
+        ClaudeUsageApiNextAttemptAt = other.ClaudeUsageApiNextAttemptAt;
         VSCodeWorkspacePath = other.VSCodeWorkspacePath ?? "";
         ClaudeShortWindowTokenLimit = other.ClaudeShortWindowTokenLimit;
         ClaudeWeeklyTokenLimit = other.ClaudeWeeklyTokenLimit;

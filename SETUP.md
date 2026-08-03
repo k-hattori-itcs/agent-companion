@@ -62,12 +62,12 @@ Codex の状況は `%USERPROFILE%\.codex\sessions\**\rollout-*.jsonl` から読�
 1. タスクトレイの AgentCompanion アイコンを右クリックして `設定` を開きます。
 2. `接続` タブを開きます。
 3. `状況を読む対象` を `Claude` にします。
-4. `ダブルクリックで開くアプリ` を `VSCode` にします。
+4. `ダブルクリックで開くアプリ` を `VSCode` または `Claude Desk` にします。
 5. `Claude ホーム` を通常は `C:\Users\<user>\.claude` にします。
-6. `VSCode ワークスペース` を Claude Code を開くフォルダにします。
+6. 起動先に `VSCode` を選んだ場合は、`VSCode ワークスペース` を Claude Code を開くフォルダにします。`Claude Desk` を選んだ場合は、WindowsのStartメニューからClaude Deskを起動できることを確認します。
 7. 設定画面のバッジが `Claude監視` になっていることを確認します。
 
-Claude の状況は `.claude\projects\**\*.jsonl` から読みます。利用量はClaude Code OAuthの利用状況APIを優先し、取得できない場合は `~/.claude/agentcompanion-rate-limits.json`（旧名 `agentpet-rate-limits.json` も可）、最後にローカル履歴の推定値へ切り替わります。
+Claude Desk を選んだ場合も、起動先だけがClaude Deskへ変わります。状況の吹き出しと利用量リングは、Claude Code CLI の `.claude\projects\**\*.jsonl` と利用量情報を読みます。利用量はClaude Code OAuthの利用状況APIを優先し、取得できない場合は `~/.claude/agentcompanion-rate-limits.json`（旧名 `agentpet-rate-limits.json` も可）、最後にローカル履歴の推定値へ切り替わります。
 
 
 ### Claude の5時間/週間リングを公式表示に近づける
@@ -165,17 +165,17 @@ AgentCompanion を配置したフォルダの `AgentCompanion.exe` を実行し�
 
 ### Claude の利用量がすぐ反映されない
 
-Claude CodeのOAuth利用状況APIを20秒間隔で確認します。起動直後は取得まで数秒かかることがあります。API取得に失敗した場合はstatusline由来の `~/.claude/agentcompanion-rate-limits.json`、その次にJSONL推定へ切り替わります。推定表示には `5h~` / `W~` が付きます。
+Claude CodeのOAuth利用状況APIは、成功時は15分間隔で確認します。期限切れまたは期限が近いアクセストークンは、Claude Codeの更新トークンで更新してから問い合わせます。認証・通信など通常の失敗時は5分後に再試行し、429の場合はサーバーの `Retry-After` を優先します。次回試行時刻は再起動後も保持します。API取得に失敗した場合はstatusline由来の `~/.claude/agentcompanion-rate-limits.json`、その次にJSONL推定へ切り替わります。推定表示には `5h~` / `W~` が付きます。20秒間隔なのはローカルJSONLとstatusline情報の確認です。
 
-### Codex / VSCode が開かない
+### Codex / VSCode / Claude Desk が開かない
 
-設定の `ダブルクリックで開くアプリ` と、Codex / VSCode のインストール状態を確認してください。
+設定の `ダブルクリックで開くアプリ` と、Codex / VSCode / Claude Desk のインストール状態を確認してください。Claude Desk はWindowsのStartメニューから起動できる状態である必要があります。
 
 ## 10. プライバシーとログ
 
 AgentCompanionは独自テレメトリを送信しません。Codex/Claudeの状況要約はローカルJSONLの直近メッセージを短縮して表示し、外部LLMへ要約を依頼しません。Claude監視時は利用率取得のため、Claude CodeのOAuth認証でAnthropicの利用状況APIへ読み取り専用リクエストを送ります。
 
-- 読み取り: `%USERPROFILE%/.codex/sessions/**/rollout-*.jsonl`、Claudeホーム内の `projects/**/*.jsonl`、`.credentials.json` のClaude Code OAuthアクセストークン、`agentcompanion-rate-limits.json`。アクセストークンはAnthropic API認証だけに使い、保存・ログ出力しません
+- 読み取り: `%USERPROFILE%/.codex/sessions/**/rollout-*.jsonl`、Claudeホーム内の `projects/**/*.jsonl`、`.credentials.json` のClaude Code OAuthアクセストークン・更新トークン・有効期限、`agentcompanion-rate-limits.json`。アクセストークンはAnthropic API認証だけに使い、AgentCompanionの設定・表示・ログには保存しません。更新に成功した場合だけ、Claude Codeと同じ `.credentials.json` 内の値を原子的に更新します
 - 保存: `%LOCALAPPDATA%\AgentCompanion\instances\<instance-id>` 内の `pet_config.json`、`token_history.json`、`proxy_targets.json`、キャラクターデータ
 - ログ: 同じユーザーデータフォルダ内の `agentcompanion.log`。proxyデバッグを有効にした場合だけ `debug.log`
 - proxy: `127.0.0.1`だけで待ち受け、APIキーと本文は保存しません
