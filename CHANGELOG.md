@@ -6,11 +6,7 @@
 
 ## Unreleased
 
-- Claude Code OAuth利用量取得で、期限切れ・期限間近の資格情報を更新してから利用量を問い合わせるよう改善
-- 401時は資格情報更新後に利用量APIを一度だけ再試行し、429の Retry-After を再起動後も保持
-- Claude Code CLI、Claude Desk、Codexの監視・認証経路を見直し、OAuth通信はClaude Code CLIの明示的な利用量取得に限定
-
-
+- 次回リリース予定の変更はここに記載します。
 ## 1.1.0 - 2026-08-03
 
 - ダブルクリックの起動先に `Claude Desk` を追加。Claude Desktop が未起動なら起動し、起動済みなら前面に表示
@@ -18,6 +14,10 @@
 - Claude Desktop を起動・前面表示できない場合に、画面上へ理由を表示
 - 旧版の Claude 監視設定で VSCode 起動が暗黙だった構成を、初回読み込み時に移行
 - Claude Desk を開く機能と、Claude Code CLI のローカル履歴・利用量を読む監視機能は別であることを明確化
+- Claude Code OAuth利用量取得で、期限切れ・期限間近の資格情報を更新してから利用量を問い合わせるよう改善
+- 401時は資格情報更新後に利用量APIを一度だけ再試行し、429の Retry-After を再起動後も保持
+- Claude Code CLI、Claude Desk、Codexの監視・認証経路を見直し、OAuth通信はClaude Code CLIの明示的な利用量取得に限定
+
 ## 1.0.0 - 2026-07-28
 
 - Codex と Claude Code CLI の実行状況を、デスクトップキャラクターの吹き出しで確認できます。
