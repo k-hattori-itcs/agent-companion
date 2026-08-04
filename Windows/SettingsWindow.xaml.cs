@@ -443,7 +443,7 @@ public partial class SettingsWindow : Window
         var previewPath = Path.Combine(pet.Directory, "preview-idle.png");
         if (File.Exists(previewPath))
         {
-            image.Source = new BitmapImage(new Uri(previewPath));
+            image.Source = LoadCharacterPreview(previewPath);
             return border;
         }
 
@@ -460,6 +460,11 @@ public partial class SettingsWindow : Window
         });
 
         return border;
+    }
+
+    internal static BitmapSource? LoadCharacterPreview(string previewPath)
+    {
+        return SpriteLoader.LoadSpritesheet(previewPath);
     }
 
     private void BuildConnectionTab()

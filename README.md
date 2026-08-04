@@ -7,6 +7,11 @@ AgentCompanion は、デスクトップ上のキャラクターが Codex / Claud
 
 元プロジェクト [sugar301/TokenPet](https://github.com/sugar301/TokenPet) をベースに、Codex と Claude Code のローカル履歴監視、常時トークンリング表示、アプリ起動/前面表示、複数キャラクター切替を追加したカスタム版です。
 
+## v1.1.2 の内容
+
+- 同じIDの更新版キャラクターZIPを、AgentCompanionを終了せずに再インポートできます。
+- 設定画面を開いたままでも、スプライトとプレビュー画像が即時更新されます。
+
 ## v1.1.0 の内容
 
 - ダブルクリックの起動先に `Claude Desk` を追加。未起動なら起動し、起動済みなら前面に表示します。
