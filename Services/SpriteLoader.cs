@@ -55,10 +55,16 @@ public static class SpriteLoader
     }
     private static BitmapSource LoadStandard(string path)
     {
+        using var stream = new FileStream(
+            path,
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.ReadWrite | FileShare.Delete);
         var bmp = new BitmapImage();
         bmp.BeginInit();
-        bmp.UriSource = new Uri(path);
+        bmp.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
         bmp.CacheOption = BitmapCacheOption.OnLoad;
+        bmp.StreamSource = stream;
         bmp.EndInit();
         bmp.Freeze();
         return bmp;

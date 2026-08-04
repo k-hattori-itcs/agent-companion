@@ -2,6 +2,7 @@ using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
 using AgentCompanion.Services;
+using AgentCompanion.Windows;
 using Xunit;
 
 namespace AgentCompanion.Tests;
@@ -132,6 +133,30 @@ public sealed class PetManagerTests : IDisposable
         Assert.True(File.Exists(Path.Combine(petDir, "spritesheet.png")));
         Assert.False(File.Exists(Path.Combine(petDir, "preview-idle.png")));
     }
+
+    [Fact]
+    public void ImportPet_ReimportsSamePackageWhilePreviewIsDisplayed()
+    {
+        var manager = new PetManager(PetsDirectory);
+        var firstPackage = CreatePackage(
+            "safe-pet",
+            "spritesheet.png",
+            new Dictionary<string, byte[]> { ["preview-idle.png"] = ValidPng });
+        Assert.Null(manager.ImportPet(firstPackage));
+        manager.Setup();
+        var previewPath = Path.Combine(PetsDirectory, "safe-pet", "preview-idle.png");
+        var displayedPreview = SettingsWindow.LoadCharacterPreview(previewPath);
+        var updatedPackage = CreatePackage(
+            "safe-pet",
+            "spritesheet.png",
+            new Dictionary<string, byte[]> { ["preview-idle.png"] = ValidPng });
+
+        var result = manager.ImportPet(updatedPackage);
+
+        Assert.NotNull(displayedPreview);
+        Assert.Null(result);
+    }
+
     [Fact]
     public void Setup_AppliesLunaSittingScaleWhenManifestDoesNotSpecifyOne()
     {
