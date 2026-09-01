@@ -28,7 +28,7 @@
 
   <ItemGroup>
     <PackageReference Include="SkiaSharp" Version="2.88.9" />
-    <PackageReference Include="System.Text.Json" Version="8.0.6" />
+    <PackageReference Include="System.Text.Json" Version="10.0.11" />
   </ItemGroup>
 
   <ItemGroup>
